@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
@@ -256,6 +256,30 @@ const Login = () => {
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
     const { login: authLogin, error: authError } = useAuth();
+    const [rememberEmail, setRememberEmail] = useState(true);
+    const passwordRef = useRef(null);
+
+    // Prefill saved email and focus password for faster login
+    useEffect(() => {
+        try {
+            const savedEmail =
+                localStorage.getItem('lastLoginEmail') ||
+                (() => {
+                    try {
+                        const u = JSON.parse(localStorage.getItem('user'));
+                        return u?.email || "";
+                    } catch {
+                        return "";
+                    }
+                })();
+            if (savedEmail) {
+                setFormData((prev) => ({ ...prev, email: savedEmail }));
+                setTimeout(() => passwordRef.current?.focus(), 0);
+            }
+        } catch {
+            // ignore
+        }
+    }, []);
 
     // We now delegate login entirely to AuthContext (handles token, user, and navigate)
 
@@ -310,6 +334,11 @@ const Login = () => {
             console.log('Attempting login with:', { email: formData.email });
             // Call AuthContext login so context.user updates immediately and it navigates to /dashboard
             await authLogin(formData.email.trim(), formData.password);
+            if (rememberEmail) {
+                localStorage.setItem('lastLoginEmail', formData.email.trim());
+            } else {
+                localStorage.removeItem('lastLoginEmail');
+            }
             // AuthContext handles navigation; optional success message for brief visual feedback
             setSuccess("Login successful! Redirecting...");
 
@@ -400,6 +429,8 @@ const Login = () => {
                                     <input
                                         type="email"
                                         name="email"
+                                        id="email"
+                                        autoComplete="username"
                                         value={formData.email}
                                         onChange={handleChange}
                                         placeholder="Enter your email"
@@ -422,6 +453,9 @@ const Login = () => {
                                     <input
                                         type={showPassword ? "text" : "password"}
                                         name="password"
+                                        id="password"
+                                        autoComplete="current-password"
+                                        ref={passwordRef}
                                         value={formData.password}
                                         onChange={handleChange}
                                         placeholder="Enter your password"
@@ -448,8 +482,25 @@ const Login = () => {
                                 </div>
                             </div>
 
-                            {/* Forgot Password Link */}
-                            <div className="flex justify-end">
+                            {/* Saved account + Forgot Password */}
+                            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                {(() => {
+                                    const saved = typeof window !== 'undefined' ? localStorage.getItem('lastLoginEmail') : null;
+                                    return saved ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setFormData((p) => ({ ...p, email: saved }));
+                                                setTimeout(() => passwordRef.current?.focus(), 0);
+                                            }}
+                                            className="inline-flex items-center gap-2 text-xs sm:text-sm px-3 py-1.5 rounded-full bg-white/10 border border-white/15 text-white/80 hover:bg-white/15 transition"
+                                            disabled={loading}
+                                        >
+                                            <span className="inline-block w-2 h-2 rounded-full bg-green-400/80" />
+                                            Continue as {saved}
+                                        </button>
+                                    ) : null;
+                                })()}
                                 <Link
                                     to="/forgot-password"
                                     className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-200"
@@ -457,6 +508,18 @@ const Login = () => {
                                     Forgot password?
                                 </Link>
                             </div>
+
+                            {/* Remember email */}
+                            <label className="flex items-center gap-2 text-xs sm:text-sm text-white/70 select-none">
+                                <input
+                                    type="checkbox"
+                                    className="accent-blue-500"
+                                    checked={rememberEmail}
+                                    onChange={(e) => setRememberEmail(e.target.checked)}
+                                    disabled={loading}
+                                />
+                                Remember my email on this device
+                            </label>
 
                             {/* Success Message (short-lived before redirect) */}
                             {success && (
