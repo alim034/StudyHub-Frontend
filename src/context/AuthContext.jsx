@@ -38,7 +38,8 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.post('/auth/login', { email, password });
       // 4. SAVE THE TOKEN!
       localStorage.setItem('token', data.token);
-      setUser(data);
+      // Some APIs return { token, user }, others return the user directly
+      setUser(data?.user || data);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
@@ -56,7 +57,7 @@ export const AuthProvider = ({ children }) => {
       const { data } = await api.post('/auth/register', { name, email, password });
       // 6. SAVE THE TOKEN!
       localStorage.setItem('token', data.token);
-      setUser(data);
+      setUser(data?.user || data);
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Registration failed");

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { 
     Eye, 
@@ -11,9 +11,8 @@ import {
     Heart
 } from "lucide-react";
 import logo from "../assets/studyhub-logo.jpg";
-// Use centralized auth API to avoid base URL mismatches
-import { login as loginApi } from "../api/authApi";
-import { API_BASE_URL } from "../config/config";
+// Use AuthContext to ensure user state updates immediately and navigation happens without refresh
+import { useAuth } from "../context/AuthContext";
 
 // --- Enhanced Animated Background Component ---
 const AnimatedBackground = () => {
@@ -256,10 +255,9 @@ const Login = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [success, setSuccess] = useState("");
-    const navigate = useNavigate();
+    const { login: authLogin, error: authError } = useAuth();
 
-    // API Base URL (for any fallback fetches). Primary calls use loginApi
-    const API_BASE = import.meta.env.VITE_API_URL || API_BASE_URL || "http://localhost:5001";
+    // We now delegate login entirely to AuthContext (handles token, user, and navigate)
 
     const handleChange = (e) => {
         setFormData({
@@ -310,18 +308,10 @@ const Login = () => {
 
         try {
             console.log('Attempting login with:', { email: formData.email });
-
-            // Use shared API wrapper which points to the correct base URL and stores token/user
-            const result = await loginApi(formData.email.trim(), formData.password);
-
-            // Normalize user storage in case the wrapper didn't store
-            if (result?.token) {
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('user', JSON.stringify(result.user || result));
-            }
-
+            // Call AuthContext login so context.user updates immediately and it navigates to /dashboard
+            await authLogin(formData.email.trim(), formData.password);
+            // AuthContext handles navigation; optional success message for brief visual feedback
             setSuccess("Login successful! Redirecting...");
-            setTimeout(() => navigate("/dashboard", { replace: true }), 800);
 
         } catch (error) {
             console.error('Login error:', error);
@@ -468,7 +458,7 @@ const Login = () => {
                                 </Link>
                             </div>
 
-                            {/* Success Message */}
+                            {/* Success Message (short-lived before redirect) */}
                             {success && (
                                 <motion.div
                                     initial={{ opacity: 0, y: -10 }}
@@ -481,14 +471,14 @@ const Login = () => {
                             )}
 
                             {/* Error Message */}
-                            {error && (
+                            {(error || authError) && (
                                 <motion.div
                                     initial={{ opacity: 0, y: -10 }}
                                     animate={{ opacity: 1, y: 0 }}
                                     className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-300 text-sm backdrop-blur-sm flex items-center gap-2"
                                 >
                                     <AlertCircle className="w-4 h-4" />
-                                    {error}
+                                    {error || authError}
                                 </motion.div>
                             )}
 
