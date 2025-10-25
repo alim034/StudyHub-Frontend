@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+/* This applies the custom theme properties defined in your tailwind.config.js 
+  to the entire application for a consistent look and feel.
+*/
+/* Tailwind v4: define custom theme colors with @theme so classes like bg-bg work */
+html, body, #root {
+  min-height: 100vh;
+  height: auto;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+@theme {
+  --color-primary: #2563EB;
+  --color-accent: #06B6D4;
+  --color-bg: #F3F4F6;
+  --color-card: #FFFFFF;
+  --color-danger: #EF4444;
+  --color-neutral: #374151;
+  --color-muted: #6B7280;
+}
+@layer base {
+  body {
+    @apply bg-bg text-neutral font-sans antialiased; /* antialiased makes fonts look smoother */
+  }
+}
+
+/* A reusable container class to center and pad your main content area.
+*/
+.app-container {
+  @apply max-w-7xl mx-auto px-4;
+}
+
+@keyframes blink-gradient {
+  0%, 100% {
+    color: #fff;
+    background: none;
+    -webkit-background-clip: initial;
+    -webkit-text-fill-color: initial;
+  }
+  50% {
+    background: linear-gradient(90deg, #3b82f6, #06b6d4, #22c55e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: #3b82f6;
+  }
+}
+.blink-gradient {
+  animation: blink-gradient 0.8s linear 1;
+}
+.gradient-text {
+  background: linear-gradient(90deg, #3b82f6, #06b6d4, #22c55e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: #3b82f6;
+}
