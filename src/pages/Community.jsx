@@ -391,7 +391,7 @@ export default function Community() {
             console.log('Sending to:', `${API_BASE}/api/contact`);
             console.log('Form data:', form);
             
-            const response = await fetch(`${API_BASE}/api/contact`, { 
+            const response = await fetch(`${API_BASE}/contact`, { 
                 method: "POST", 
                 headers: { 
                     "Content-Type": "application/json",
@@ -589,7 +589,7 @@ export default function Community() {
                                     </HeroButton>
                                     <div className="flex flex-col sm:flex-row items-center gap-4 text-white/70 text-sm">
                                         <a href="mailto:alimmohammad191786@gmail.com" className="hover:text-white inline-flex items-center gap-2 transition-colors duration-300">
-                                            <Mail className="w-4 h-4" /> alimmohammad191786@gmail.com
+                                            <Mail className="w-4 h-4" /> support@studyhub.live
                                         </a>
                                         <span className="hidden sm:inline-block">•</span>
                                         <a href="tel:+919370150313" className="hover:text-white inline-flex items-center gap-2 transition-colors duration-300">
