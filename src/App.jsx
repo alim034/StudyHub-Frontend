@@ -45,6 +45,8 @@ import { AuthProvider, AuthContext } from "./context/AuthContext";
 import { ToastProvider } from "./components/common/Toast";
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5001/api";
+console.log("Frontend API URL:", import.meta.env.VITE_API_URL);
+
 
 // Shows or hides navbars (no navbar on full-screen call)
 const NavbarSwitcher = () => {
